@@ -18,7 +18,7 @@ public class UserCreationParametrizedTest {
 
     public static Faker faker = new Faker();
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "Данные пользователя: {0} {1} {2}")
     public static Object[][] getParamsForUser() {
         return new Object[][]{
                 {new User(null, faker.internet().password(), faker.name().name())},

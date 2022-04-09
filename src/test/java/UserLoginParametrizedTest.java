@@ -25,7 +25,7 @@ public class UserLoginParametrizedTest {
         this.password = password;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "Данные пользователя: {0} {1}")
     public static Object[][] getParamsForUserCredentials() {
         return new Object[][]{
                 {user.getEmail() + "1", user.getPassword()},

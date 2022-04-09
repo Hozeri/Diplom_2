@@ -24,7 +24,7 @@ public class UserCanChangeDataParametrizedTest {
 
     public static Faker faker = new Faker();
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "Данные пользователя: {0}")
     public static Object[][] getParamsForNewUserProfile() {
         return new Object[][]{
                 {"{ \"email\" : \"" + faker.internet().emailAddress() + "\"}"},
