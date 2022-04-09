@@ -35,26 +35,26 @@ public class UserClient extends RestAssuredClient {
     }
 
     @Step
-    public ValidatableResponse changeUserProfileData(String userProfileData, boolean isAuthorized) {
-        if (isAuthorized) {
-            return given()
-                    .spec(getBaseSpec())
-                    //.log().all()
-                    .auth().oauth2(Token.getAccessToken().substring(7))
-                    .body(userProfileData)
-                    .when()
-                    .patch(USER_PATH + "user")
-                    .then();
-        } else {
-            return given()
-                    .spec(getBaseSpec())
-                    //.log().all()
-                    .body(userProfileData)
-                    .when()
-                    .patch(USER_PATH + "user")
-                    .then();
-        }
+    public ValidatableResponse changeUserProfileDataAuth(String userProfileData) {
+        return given()
+                .spec(getBaseSpec())
+                //.log().all()
+                .auth().oauth2(Token.getAccessToken().substring(7))
+                .body(userProfileData)
+                .when()
+                .patch(USER_PATH + "user")
+                .then();
+    }
 
+    @Step
+    public ValidatableResponse changeUserProfileDataNotAuth(String userProfileData) {
+        return given()
+                .spec(getBaseSpec())
+                //.log().all()
+                .body(userProfileData)
+                .when()
+                .patch(USER_PATH + "user")
+                .then();
     }
 
     @Step
@@ -67,7 +67,7 @@ public class UserClient extends RestAssuredClient {
                 .delete(USER_PATH + "user")
                 .then()
                 .statusCode(SC_ACCEPTED);
-                //.log().all();
+        //.log().all();
     }
 
     public static void setAccessTokenFromResponse(Response response) {
