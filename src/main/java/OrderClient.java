@@ -8,7 +8,7 @@ public class OrderClient extends RestAssuredClient {
 
     private static final String ORDER_PATH = "/orders";
 
-    @Step
+    @Step("Создание заказа авторизованным пользователем")
     public ValidatableResponse createOrderAuth(Ingredients ingredients) {
         return given()
                 .spec(getBaseSpec())
@@ -20,7 +20,7 @@ public class OrderClient extends RestAssuredClient {
                 .then();
     }
 
-    @Step
+    @Step("Создание заказа неавторизованным пользователем")
     public ValidatableResponse createOrderNotAuth(Ingredients ingredients) {
         return given()
                 .spec(getBaseSpec())
@@ -31,19 +31,17 @@ public class OrderClient extends RestAssuredClient {
                 .then();
     }
 
-    @Step
-    public Response getIngredients() {
-        Response response = given()
+    @Step("Получение данных об ингредиентах")
+    public ValidatableResponse getIngredients() {
+        return given()
                 .spec(getBaseSpec())
                 //.log().all()
                 .when()
                 .get("/ingredients")
-                .then()
-                .extract().response();
-        return response;
+                .then();
     }
 
-    @Step
+    @Step("Получение заказов авторизованного пользователя")
     public ValidatableResponse getUserOrdersAuth() {
         return given()
                 .spec(getBaseSpec())
@@ -54,7 +52,7 @@ public class OrderClient extends RestAssuredClient {
                 .then();
     }
 
-    @Step
+    @Step("Получение заказов неавторизованного пользователя")
     public ValidatableResponse getUserOrdersNotAuth() {
         return given()
                 .spec(getBaseSpec())

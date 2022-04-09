@@ -9,21 +9,18 @@ public class UserClient extends RestAssuredClient {
 
     private static final String USER_PATH = "/auth/";
 
-    @Step
-    public Response create(User user) {
-        Response response = given()
+    @Step("Создание пользователя")
+    public ValidatableResponse create(User user) {
+        return given()
                 .spec(getBaseSpec())
                 //.log().all()
                 .body(user)
                 .when()
                 .post(USER_PATH + "register")
-                .then()
-                //.log().all()
-                .extract().response();
-        return response;
+                .then();
     }
 
-    @Step
+    @Step("Авторизация пользователя")
     public ValidatableResponse login(UserCredentials userCredentials) {
         return given()
                 .spec(getBaseSpec())
@@ -34,7 +31,7 @@ public class UserClient extends RestAssuredClient {
                 .then();
     }
 
-    @Step
+    @Step("Изменение данных авторизованного пользователя")
     public ValidatableResponse changeUserProfileDataAuth(String userProfileData) {
         return given()
                 .spec(getBaseSpec())
@@ -46,7 +43,7 @@ public class UserClient extends RestAssuredClient {
                 .then();
     }
 
-    @Step
+    @Step("Изменение данных неавторизованного пользователя")
     public ValidatableResponse changeUserProfileDataNotAuth(String userProfileData) {
         return given()
                 .spec(getBaseSpec())
@@ -57,7 +54,7 @@ public class UserClient extends RestAssuredClient {
                 .then();
     }
 
-    @Step
+    @Step("Удаление пользователя")
     public void deleteUser() {
         given()
                 .spec(getBaseSpec())
@@ -68,11 +65,6 @@ public class UserClient extends RestAssuredClient {
                 .then()
                 .statusCode(SC_ACCEPTED);
         //.log().all();
-    }
-
-    public static void setAccessTokenFromResponse(Response response) {
-        String token = response.path("accessToken").toString();
-        Token.setAccessToken(token);
     }
 
 }
