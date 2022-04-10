@@ -13,7 +13,7 @@ public class Ingredients {
 
     public static Ingredients getRandomIngredientsForBurger() {
         OrderClient orderClient = new OrderClient();
-        Response response = orderClient.getIngredients();
+        Response response = orderClient.getIngredients().extract().response();
 
         List<Object> buns = response.jsonPath().getList("data.findAll {it.type == 'bun'}._id");
         List<Object> sauces = response.jsonPath().getList("data.findAll {it.type == 'sauce'}._id");
