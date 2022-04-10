@@ -2,20 +2,29 @@ import com.github.javafaker.Faker;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(Parameterized.class)
 public class UserCanNotChangeDataParametrizedTest {
 
+    private User user;
+    private UserClient userClient;
+
+    @Before
+    public void setUp() {
+        user = User.getRandomUser();
+        userClient = new UserClient();
+    }
+
     @After
     public void tearDown() {
-        UserClient userClient = new UserClient();
         userClient.deleteUser();
     }
 
@@ -39,15 +48,11 @@ public class UserCanNotChangeDataParametrizedTest {
     @Test
     @DisplayName("Неавторизованный пользователь не может изменить данные в своём профиле")
     public void changeUserProfileDataNotAuthorizedUserReturnsCodeUnauthorizedTest() {
-        User user = User.getRandomUser();
-        UserClient userClient = new UserClient();
-        Response response = userClient.create(user);
-        UserClient.setAccessTokenFromResponse(response);
-        userClient.changeUserProfileData(userNewProfileData, false)
-                .assertThat()
-                .statusCode(SC_UNAUTHORIZED)
-                .and()
-                .body("success", is(false));
+        Response response = userClient.create(user).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response userProfileResponse = userClient.changeUserProfileDataNotAuth(userNewProfileData).extract().response();
+        assertEquals("Status code isn't UNAUTHORIZED", SC_UNAUTHORIZED, userProfileResponse.statusCode());
+        assertFalse(userProfileResponse.path("success"));
     }
 
 }

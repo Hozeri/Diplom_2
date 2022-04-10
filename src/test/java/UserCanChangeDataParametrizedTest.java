@@ -1,23 +1,34 @@
 import com.github.javafaker.Faker;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.Response;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static org.apache.http.HttpStatus.SC_OK;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class UserCanChangeDataParametrizedTest {
 
+    private User user;
+    private UserClient userClient;
+
+    @Before
+    public void setUp() {
+        user = User.getRandomUser();
+        userClient = new UserClient();
+    }
+
     @After
     public void tearDown() {
-        UserClient userClient = new UserClient();
         userClient.deleteUser();
     }
 
-    private String userNewProfileData;
+    private final String userNewProfileData;
 
     public UserCanChangeDataParametrizedTest(String userNewProfileData) {
         this.userNewProfileData = userNewProfileData;
@@ -37,19 +48,12 @@ public class UserCanChangeDataParametrizedTest {
     @Test
     @DisplayName("Авторизованный пользователь может изменить данные в своём профиле")
     public void changeUserProfileDataAuthorizedUserReturnsCodeOKTest() {
-        User user = User.getRandomUser();
-        UserClient userClient = new UserClient();
         UserCredentials userCredentials = UserCredentials.getUserCredentials(user);
         userClient.create(user);
-        String token = userClient.login(userCredentials)
-                .statusCode(SC_OK)
-                .and()
-                .extract().path("accessToken");
-        Token.setAccessToken(token);
-        userClient.changeUserProfileData(userNewProfileData, true)
-                .assertThat()
-                .statusCode(SC_OK)
-                .and()
-                .body("success", is(true));
+        Response response = userClient.login(userCredentials).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response userProfileResponse = userClient.changeUserProfileDataAuth(userNewProfileData).extract().response();
+        assertEquals("Status code isn't OK", SC_OK, userProfileResponse.statusCode());
+        assertTrue(userProfileResponse.path("success"));
     }
 }
