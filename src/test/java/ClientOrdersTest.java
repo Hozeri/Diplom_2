@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ClientOrdersTest {
     private User user;
     private UserCredentials userCredentials;
     private UserClient userClient;
     private OrderClient orderClient;
-    private Ingredients ingredients;
 
     @Before
     public void setUp() {
@@ -21,7 +21,6 @@ public class ClientOrdersTest {
         userCredentials = UserCredentials.getUserCredentials(user);
         userClient = new UserClient();
         orderClient = new OrderClient();
-        ingredients = Ingredients.getRandomIngredientsForBurger();
     }
 
     @After
@@ -33,28 +32,21 @@ public class ClientOrdersTest {
     @DisplayName("Авторизованный пользователь может получить свои заказы")
     public void getClientOrdersAuthorizedUserReturnsCodeOKTest() {
         userClient.create(user);
-        String token = userClient.login(userCredentials)
-                .extract().path("accessToken");
-        Token.setAccessToken(token);
-        orderClient.getUserOrders(true)
-                //.log().all()
-                .assertThat()
-                .statusCode(SC_OK)
-                .and()
-                .body("success", is(true));
+        Response response = userClient.login(userCredentials).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response userOrdersResponse = orderClient.getUserOrdersAuth().extract().response();
+        assertEquals("Status code isn't OK", SC_OK, userOrdersResponse.statusCode());
+        assertTrue(userOrdersResponse.path("success"));
     }
 
     @Test
     @DisplayName("Неавторизованный пользователь не может получить свои заказы")
     public void getClientOrdersUnauthorizedUserReturnsCodeUnauthorizedTest() {
-        Response response = userClient.create(user);
-        UserClient.setAccessTokenFromResponse(response);
-        orderClient.getUserOrders(false)
-                //.log().all()
-                .assertThat()
-                .statusCode(SC_UNAUTHORIZED)
-                .and()
-                .body("message", is("You should be authorised"));
+        Response response = userClient.create(user).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response userOrdersResponse = orderClient.getUserOrdersNotAuth().extract().response();
+        assertEquals("Status code isn't UNAUTHORIZED", SC_UNAUTHORIZED, userOrdersResponse.statusCode());
+        assertEquals("Value of the 'message' doesn't match with expected one","You should be authorised", userOrdersResponse.path("message"));
     }
 
 }

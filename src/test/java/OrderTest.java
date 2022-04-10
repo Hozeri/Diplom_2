@@ -1,4 +1,5 @@
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.path.xml.XmlPath;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -6,6 +7,9 @@ import org.junit.Test;
 
 import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 
 public class OrderTest {
 
@@ -33,58 +37,43 @@ public class OrderTest {
     @DisplayName("Авторизованный пользователь может сделать заказ")
     public void makeOrderAuthorizedUserReturnsCodeOKTest() {
         userClient.create(user);
-        String token = userClient.login(userCredentials)
-                .extract().path("accessToken");
-        Token.setAccessToken(token);
-        orderClient.createOrder(ingredients, true)
-                .assertThat()
-                .statusCode(SC_OK)
-                .and()
-                .body("order.number", is(notNullValue()));
+        Response response = userClient.login(userCredentials).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response orderResponse = orderClient.createOrderAuth(ingredients).extract().response();
+        assertEquals("Status code isn't OK", SC_OK, orderResponse.statusCode());
+        assertThat("The order's number is null", orderResponse.path("order.number"), is(notNullValue()));
     }
 
     @Test
     @DisplayName("Неавторизованный пользователь не может сделать заказ")
     public void makeOrderUnauthorizedUserReturnsCodeUnauthorizedTest() {
-        Response response = userClient.create(user);
-        UserClient.setAccessTokenFromResponse(response);
-        orderClient.createOrder(ingredients, false)
-                .assertThat()
-                .statusCode(SC_UNAUTHORIZED)
-                .and()
-                .body("success", is(false));
+        Response response = userClient.create(user).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response orderResponse = orderClient.createOrderNotAuth(ingredients).extract().response();
+        assertEquals("Status code isn't UNAUTHORIZED", SC_UNAUTHORIZED, orderResponse.statusCode());
+        assertFalse(orderResponse.path("success"));
     }
 
     @Test
     @DisplayName("Невозможно создать заказ без ингредиентов")
     public void makeOrderNoIngredientsReturnsCodeBadRequestTest() {
         userClient.create(user);
-        String token = userClient.login(userCredentials)
-                .statusCode(SC_OK)
-                .and()
-                .extract().path("accessToken");
-        Token.setAccessToken(token);
-        orderClient.createOrder(Ingredients.getBurgerWithoutIngredients(), true)
-                .assertThat()
-                .statusCode(SC_BAD_REQUEST)
-                .and()
-                .body("message", is("Ingredient ids must be provided"));
+        Response response = userClient.login(userCredentials).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response orderResponse = orderClient.createOrderAuth(Ingredients.getBurgerWithoutIngredients()).extract().response();
+        assertEquals("Status code isn't BAD_REQUEST", SC_BAD_REQUEST, orderResponse.statusCode());
+        assertEquals("Value of the 'message' doesn't match with expected one","Ingredient ids must be provided", orderResponse.path("message"));
     }
 
     @Test
     @DisplayName("Невозможно создать заказ, отправив некорректный hash ингредиентов")
     public void makeOrderIngredientsWithWrongHashReturnsCodeBadRequestTest() {
         userClient.create(user);
-        String token = userClient.login(userCredentials)
-                .statusCode(SC_OK)
-                .and()
-                .extract().path("accessToken");
-        Token.setAccessToken(token);
-        orderClient.createOrder(Ingredients.getIngredientsWithWrongHash(), true)
-                .assertThat()
-                .statusCode(SC_INTERNAL_SERVER_ERROR)
-                .and()
-                .body("html.head.title", is("Error"));
+        Response response = userClient.login(userCredentials).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response orderResponse = orderClient.createOrderAuth(Ingredients.getIngredientsWithWrongHash()).extract().response();
+        assertEquals("Status code isn't INTERNAL_SERVER_ERROR", SC_INTERNAL_SERVER_ERROR, orderResponse.statusCode());
+        assertThat("HTML title doesn't contain 'Error' value", orderResponse.xmlPath(XmlPath.CompatibilityMode.HTML).getString("html.head.title"), is("Error"));
     }
 
 }
