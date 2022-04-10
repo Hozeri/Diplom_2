@@ -28,7 +28,7 @@ public class UserCanNotChangeDataParametrizedTest {
         userClient.deleteUser();
     }
 
-    private String userNewProfileData;
+    private final String userNewProfileData;
 
     public UserCanNotChangeDataParametrizedTest(String userNewProfileData) {
         this.userNewProfileData = userNewProfileData;
