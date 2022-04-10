@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Test;
@@ -38,6 +39,7 @@ public class UserLoginParametrizedTest {
     }
 
     @Test
+    @DisplayName("Авторизация пользователя с некорректными логином и паролем")
     public void loginUserWithIncorrectUserDataReturnsCodeUnauthorizedTest() {
         UserClient userClient = new UserClient();
         Response response = userClient.create(user);

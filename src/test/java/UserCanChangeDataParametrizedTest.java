@@ -1,4 +1,5 @@
 import com.github.javafaker.Faker;
+import io.qameta.allure.junit4.DisplayName;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ public class UserCanChangeDataParametrizedTest {
     }
 
     @Test
+    @DisplayName("Авторизованный пользователь может изменить данные в своём профиле")
     public void changeUserProfileDataAuthorizedUserReturnsCodeOKTest() {
         User user = User.getRandomUser();
         UserClient userClient = new UserClient();

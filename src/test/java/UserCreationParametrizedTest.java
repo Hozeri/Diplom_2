@@ -1,4 +1,5 @@
 import com.github.javafaker.Faker;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ public class UserCreationParametrizedTest {
     }
 
     @Test
+    @DisplayName("Регистрация пользователя с отсутствием одного из обязательных полей")
     public void userWithPartialDataCodeForbiddenTest() {
         UserClient userClient = new UserClient();
         Response response = userClient.create(user);

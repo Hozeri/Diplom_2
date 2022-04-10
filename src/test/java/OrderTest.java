@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +30,7 @@ public class OrderTest {
     }
 
     @Test
+    @DisplayName("Авторизованный пользователь может сделать заказ")
     public void makeOrderAuthorizedUserReturnsCodeOKTest() {
         userClient.create(user);
         String token = userClient.login(userCredentials)
@@ -42,6 +44,7 @@ public class OrderTest {
     }
 
     @Test
+    @DisplayName("Неавторизованный пользователь не может сделать заказ")
     public void makeOrderUnauthorizedUserReturnsCodeUnauthorizedTest() {
         Response response = userClient.create(user);
         UserClient.setAccessTokenFromResponse(response);
@@ -53,6 +56,7 @@ public class OrderTest {
     }
 
     @Test
+    @DisplayName("Невозможно создать заказ без ингредиентов")
     public void makeOrderNoIngredientsReturnsCodeBadRequestTest() {
         userClient.create(user);
         String token = userClient.login(userCredentials)
@@ -68,6 +72,7 @@ public class OrderTest {
     }
 
     @Test
+    @DisplayName("Невозможно создать заказ, отправив некорректный hash ингредиентов")
     public void makeOrderIngredientsWithWrongHashReturnsCodeBadRequestTest() {
         userClient.create(user);
         String token = userClient.login(userCredentials)

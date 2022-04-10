@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.Test;
 
@@ -7,6 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 public class UserLoginTest {
 
     @Test
+    @DisplayName("Авторизация под существующим пользователем")
     public void loginUserWithExistUserReturnsCodeOKTest() {
         User user = User.getRandomUser();
         UserCredentials userCredentials = UserCredentials.getUserCredentials(user);

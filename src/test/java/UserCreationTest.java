@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -24,6 +25,7 @@ public class UserCreationTest {
     }
 
     @Test
+    @DisplayName("Регистрация уникального пользователя")
     public void createUserWithRequiredDataReturnsCodeOKTest() {
         Response response = userClient.create(user);
         UserClient.setAccessTokenFromResponse(response);
@@ -32,6 +34,7 @@ public class UserCreationTest {
     }
 
     @Test
+    @DisplayName("Регистрация пользователя с данными уже зарегистрированного")
     public void createUserWithTheSameDataReturnsCodeForbiddenTest() {
         Response response = userClient.create(user);
         UserClient.setAccessTokenFromResponse(response);

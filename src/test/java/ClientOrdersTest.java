@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -6,7 +7,6 @@ import org.junit.Test;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 
 public class ClientOrdersTest {
     private User user;
@@ -30,6 +30,7 @@ public class ClientOrdersTest {
     }
 
     @Test
+    @DisplayName("Авторизованный пользователь может получить свои заказы")
     public void getClientOrdersAuthorizedUserReturnsCodeOKTest() {
         userClient.create(user);
         String token = userClient.login(userCredentials)
@@ -44,6 +45,7 @@ public class ClientOrdersTest {
     }
 
     @Test
+    @DisplayName("Неавторизованный пользователь не может получить свои заказы")
     public void getClientOrdersUnauthorizedUserReturnsCodeUnauthorizedTest() {
         Response response = userClient.create(user);
         UserClient.setAccessTokenFromResponse(response);
