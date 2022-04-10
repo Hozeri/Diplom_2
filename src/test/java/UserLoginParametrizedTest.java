@@ -1,19 +1,26 @@
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class UserLoginParametrizedTest {
 
+    private UserClient userClient;
+
+    @Before
+    public void setUp() {
+        userClient = new UserClient();
+    }
+
     @After
     public void tearDown() {
-        UserClient userClient = new UserClient();
         userClient.deleteUser();
     }
 
@@ -41,14 +48,11 @@ public class UserLoginParametrizedTest {
     @Test
     @DisplayName("Авторизация пользователя с некорректными логином и паролем")
     public void loginUserWithIncorrectUserDataReturnsCodeUnauthorizedTest() {
-        UserClient userClient = new UserClient();
-        Response response = userClient.create(user);
-        UserClient.setAccessTokenFromResponse(response) ;
+        Response response = userClient.create(user).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
         UserCredentials userCredentials = new UserCredentials(emailAddress, password);
-        userClient.login(userCredentials)
-                .assertThat()
-                .statusCode(SC_UNAUTHORIZED)
-                .and()
-                .body("message", is("email or password are incorrect"));
+        Response loginResponse = userClient.login(userCredentials).extract().response();
+        assertEquals("Status code isn't UNAUTHORIZED", SC_UNAUTHORIZED, loginResponse.statusCode());
+        assertEquals("Value of the 'message' doesn't match with expected one", "email or password are incorrect", loginResponse.path("message"));
     }
 }
