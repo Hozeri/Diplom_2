@@ -27,20 +27,20 @@ public class UserCreationTest {
     @Test
     @DisplayName("Регистрация уникального пользователя")
     public void createUserWithRequiredDataReturnsCodeOKTest() {
-        Response response = userClient.create(user);
-        UserClient.setAccessTokenFromResponse(response);
-        assertEquals(SC_OK, response.statusCode());
+        Response response = userClient.create(user).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        assertEquals("Status code isn't OK", SC_OK, response.statusCode());
         assertTrue(response.path("success"));
     }
 
     @Test
     @DisplayName("Регистрация пользователя с данными уже зарегистрированного")
     public void createUserWithTheSameDataReturnsCodeForbiddenTest() {
-        Response response = userClient.create(user);
-        UserClient.setAccessTokenFromResponse(response);
-        Response responseForTheSameUser = userClient.create(user);
-        assertEquals(SC_FORBIDDEN, responseForTheSameUser.statusCode());
-        assertEquals("User already exists", responseForTheSameUser.path("message"));
+        Response response = userClient.create(user).extract().response();
+        Token.setAccessToken(response.path("accessToken"));
+        Response responseForTheSameUser = userClient.create(user).extract().response();
+        assertEquals("Status code isn't FORBIDDEN", SC_FORBIDDEN, responseForTheSameUser.statusCode());
+        assertEquals("Value of the 'message' doesn't match with expected one","User already exists", responseForTheSameUser.path("message"));
     }
 
 }

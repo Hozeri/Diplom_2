@@ -11,10 +11,14 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class UserCreationParametrizedTest {
 
-    private final User user;
+    public String email;
+    public String password;
+    public String name;
 
-    public UserCreationParametrizedTest(User user) {
-        this.user = user;
+    public UserCreationParametrizedTest(String email, String password, String name) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
     }
 
     public static Faker faker = new Faker();
@@ -22,9 +26,9 @@ public class UserCreationParametrizedTest {
     @Parameterized.Parameters(name = "Данные пользователя: {0} {1} {2}")
     public static Object[][] getParamsForUser() {
         return new Object[][]{
-                {new User(null, faker.internet().password(), faker.name().name())},
-                {new User(faker.internet().emailAddress(), null, faker.name().name())},
-                {new User(faker.internet().emailAddress(), faker.internet().password(), null)}
+                {null, faker.internet().password(), faker.name().name()},
+                {faker.internet().emailAddress(), null, faker.name().name()},
+                {faker.internet().emailAddress(), faker.internet().password(), null}
         };
     }
 
@@ -32,8 +36,9 @@ public class UserCreationParametrizedTest {
     @DisplayName("Регистрация пользователя с отсутствием одного из обязательных полей")
     public void userWithPartialDataCodeForbiddenTest() {
         UserClient userClient = new UserClient();
-        Response response = userClient.create(user);
-        assertEquals(SC_FORBIDDEN, response.statusCode());
-        assertEquals("Email, password and name are required fields", response.path("message"));
+        User user = new User(email, password, name);
+        Response response = userClient.create(user).extract().response();
+        assertEquals("Status code isn't FORBIDDEN", SC_FORBIDDEN, response.statusCode());
+        assertEquals("Value of the 'message' doesn't match with expected one","Email, password and name are required fields", response.path("message"));
     }
 }
